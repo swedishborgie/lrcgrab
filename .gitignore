@@ -1,0 +1,22 @@
+/target
+**/*.rs.bk
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Build artifacts
+*.rlib
+*.so
+*.dylib
+*.dll
+
+# Profile
+profraw.*
+perf.data.*
+
+# Logs
+*.log
