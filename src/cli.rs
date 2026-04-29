@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 /// Fetch and embed synchronized lyrics into audio files
 #[derive(clap::Parser, Debug)]
-#[command(name = "lrcgrab-rs", version, about, long_about = None)]
+#[command(name = "lrcgrab", version, about, long_about = None)]
 pub struct Cli {
     /// Directory to recursively scan for audio files
     #[arg(required = true)]

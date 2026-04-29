@@ -1,4 +1,4 @@
-# lrcgrab-rs
+# lrcgrab
 
 Fetch and embed synchronized lyrics into audio files using the [LRCLib](https://lrclib.net) API.
 
@@ -23,24 +23,38 @@ cargo install --path .
 ## Usage
 
 ```bash
-# Write sidecar .lrc files (default)
-lrcgrab-rs /path/to/music
+lrcgrab [OPTIONS] <DIRECTORY>
+```
 
-# Embed lyrics into audio file tags
-lrcgrab-rs -e /path/to/music
+### Examples
 
-# Dry run to preview matches
-lrcgrab-rs -n /path/to/music
+```bash
+# Preview what would be matched without making any changes
+lrcgrab -n /path/to/music
+
+# Write sidecar .lrc files (default behavior)
+lrcgrab /path/to/music
+
+# Embed lyrics directly into audio file tags
+lrcgrab -e /path/to/music
+
+# Force overwrite existing embedded lyrics
+lrcgrab -e -f /path/to/music
 
 # Include instrumental tracks
-lrcgrab-rs -i /path/to/music
+lrcgrab -i /path/to/music
 
-# Force overwrite existing lyrics
-lrcgrab-rs -e -f /path/to/music
-
-# Use a custom lrclib instance
-lrcgrab-rs -u https://custom-lrclib.example.com /path/to/music
+# Use a custom LRCLib instance
+lrcgrab -u https://custom-lrclib.example.com /path/to/music
 ```
+
+### Warning: Embed Mode
+
+The `-e` / `--embed` flag modifies audio files in place. If the embedding process fails or encounters a malformed file, it can corrupt the audio file's metadata or the file itself. Always:
+
+1. **Run a dry run first** with `-n` to verify matches before embedding.
+2. **Keep backups** of your music library before using embed mode.
+3. Consider the `--ffmpeg-remux-fallback` flag for problematic MP3 files, which attempts recovery by remuxing through ffmpeg.
 
 ## Supported Formats
 
