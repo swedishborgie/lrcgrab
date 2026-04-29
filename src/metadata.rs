@@ -23,6 +23,44 @@ pub fn is_supported(path: &std::path::Path) -> bool {
         .unwrap_or(false)
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::Path;
+
+    #[test]
+    fn supported_lowercase_extensions() {
+        for ext in &["flac", "mp3", "m4a", "ogg", "opus", "wav", "aac"] {
+            let filename = format!("track.{ext}");
+            let path = std::path::Path::new(&filename);
+            assert!(is_supported(path), "{ext} should be supported");
+        }
+    }
+
+    #[test]
+    fn supported_uppercase_extensions() {
+        for ext in &["FLAC", "MP3", "M4A", "OGG", "OPUS", "WAV", "AAC"] {
+            let filename = format!("track.{ext}");
+            let path = std::path::Path::new(&filename);
+            assert!(is_supported(path), "{ext} (uppercase) should be supported");
+        }
+    }
+
+    #[test]
+    fn unsupported_extensions() {
+        for ext in &["txt", "pdf", "exe", "lrc", "jpg"] {
+            let filename = format!("file.{ext}");
+            let path = std::path::Path::new(&filename);
+            assert!(!is_supported(path), "{ext} should not be supported");
+        }
+    }
+
+    #[test]
+    fn no_extension_returns_false() {
+        assert!(!is_supported(Path::new("noextension")));
+    }
+}
+
 /// Extract metadata from an audio file using lofty.
 pub fn extract(path: &std::path::Path) -> anyhow::Result<TrackInfo> {
     let tagged_file = Probe::open(path)?.guess_file_type()?.read()?;

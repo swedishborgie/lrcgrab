@@ -299,3 +299,105 @@ fn parse_lrc_timestamp(ts: &str) -> Option<u32> {
     let secs: f64 = parts[1].parse().ok()?;
     Some(((mins * 60.0 + secs) * 1000.0) as u32)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::Path;
+
+    // --- can_embed ---
+
+    #[test]
+    fn can_embed_supported_formats() {
+        for ext in &["mp3", "flac", "ogg", "opus", "m4a"] {
+            assert!(can_embed(Path::new(&format!("file.{ext}"))), "{ext} should be embeddable");
+        }
+    }
+
+    #[test]
+    fn can_embed_unsupported_formats() {
+        for ext in &["wav", "aac", "txt", "lrc"] {
+            assert!(!can_embed(Path::new(&format!("file.{ext}"))), "{ext} should not be embeddable");
+        }
+    }
+
+    // --- file_type_from_ext ---
+
+    #[test]
+    fn file_type_from_ext_known() {
+        assert!(file_type_from_ext(Path::new("a.mp3")).is_some());
+        assert!(file_type_from_ext(Path::new("a.flac")).is_some());
+        assert!(file_type_from_ext(Path::new("a.ogg")).is_some());
+        assert!(file_type_from_ext(Path::new("a.opus")).is_some());
+        assert!(file_type_from_ext(Path::new("a.m4a")).is_some());
+        assert!(file_type_from_ext(Path::new("a.mp4")).is_some());
+    }
+
+    #[test]
+    fn file_type_from_ext_unknown() {
+        assert!(file_type_from_ext(Path::new("a.wav")).is_none());
+        assert!(file_type_from_ext(Path::new("a.txt")).is_none());
+        assert!(file_type_from_ext(Path::new("noext")).is_none());
+    }
+
+    // --- parse_lrc_timestamp ---
+
+    #[test]
+    fn parse_timestamp_valid() {
+        // 1:23.45 → (60 + 23.45) * 1000 = 83450
+        assert_eq!(parse_lrc_timestamp("01:23.45"), Some(83450));
+    }
+
+    #[test]
+    fn parse_timestamp_zero() {
+        assert_eq!(parse_lrc_timestamp("00:00.00"), Some(0));
+    }
+
+    #[test]
+    fn parse_timestamp_missing_colon() {
+        assert_eq!(parse_lrc_timestamp("0123.45"), None);
+    }
+
+    #[test]
+    fn parse_timestamp_non_numeric() {
+        assert_eq!(parse_lrc_timestamp("ab:cd.ef"), None);
+    }
+
+    // --- parse_lrc_entries ---
+
+    #[test]
+    fn parse_entries_normal() {
+        let lrc = "[00:01.00]Hello\n[00:02.50]World";
+        let entries = parse_lrc_entries(lrc);
+        assert_eq!(entries.len(), 2);
+        assert_eq!(entries[0].1, "Hello");
+        assert_eq!(entries[1].1, "World");
+    }
+
+    #[test]
+    fn parse_entries_skips_empty_text() {
+        let lrc = "[00:01.00]\n[00:02.00]real line";
+        let entries = parse_lrc_entries(lrc);
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].1, "real line");
+    }
+
+    #[test]
+    fn parse_entries_skips_lines_without_brackets() {
+        let lrc = "no bracket here\n[00:01.00]valid";
+        let entries = parse_lrc_entries(lrc);
+        assert_eq!(entries.len(), 1);
+    }
+
+    #[test]
+    fn parse_entries_empty_input() {
+        assert!(parse_lrc_entries("").is_empty());
+    }
+
+    #[test]
+    fn parse_entries_trims_whitespace_from_text() {
+        let lrc = "[00:01.00]  trimmed  ";
+        let entries = parse_lrc_entries(lrc);
+        assert_eq!(entries[0].1, "trimmed");
+    }
+}

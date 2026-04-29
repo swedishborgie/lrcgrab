@@ -93,3 +93,71 @@ impl Client {
         Ok(results)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn make_lyrics(synced: Option<&str>, plain: Option<&str>) -> Lyrics {
+        Lyrics {
+            id: 1,
+            name: String::new(),
+            track_name: "Track".to_string(),
+            artist_name: "Artist".to_string(),
+            album_name: None,
+            duration: 200.0,
+            instrumental: false,
+            plain_lyrics: plain.map(|s| s.to_string()),
+            synced_lyrics: synced.map(|s| s.to_string()),
+        }
+    }
+
+    // --- Lyrics::has_synced ---
+
+    #[test]
+    fn has_synced_none() {
+        assert!(!make_lyrics(None, None).has_synced());
+    }
+
+    #[test]
+    fn has_synced_empty_string() {
+        assert!(!make_lyrics(Some(""), None).has_synced());
+    }
+
+    #[test]
+    fn has_synced_with_content() {
+        assert!(make_lyrics(Some("[00:01.00]line"), None).has_synced());
+    }
+
+    // --- Lyrics::content ---
+
+    #[test]
+    fn content_prefers_synced_over_plain() {
+        let l = make_lyrics(Some("synced text"), Some("plain text"));
+        assert_eq!(l.content(), Some("synced text"));
+    }
+
+    #[test]
+    fn content_falls_back_to_plain() {
+        let l = make_lyrics(None, Some("plain text"));
+        assert_eq!(l.content(), Some("plain text"));
+    }
+
+    #[test]
+    fn content_skips_empty_synced_uses_plain() {
+        let l = make_lyrics(Some(""), Some("plain text"));
+        assert_eq!(l.content(), Some("plain text"));
+    }
+
+    #[test]
+    fn content_both_absent_returns_none() {
+        let l = make_lyrics(None, None);
+        assert!(l.content().is_none());
+    }
+
+    #[test]
+    fn content_both_empty_returns_none() {
+        let l = make_lyrics(Some(""), Some(""));
+        assert!(l.content().is_none());
+    }
+}
