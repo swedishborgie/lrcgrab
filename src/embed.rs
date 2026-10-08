@@ -19,7 +19,7 @@ const LOST_KEY_DESCS: [(ItemKey, &str); 3] = [
 pub fn can_embed(path: &std::path::Path) -> bool {
     matches!(
         path.extension().and_then(|e| e.to_str()),
-        Some("flac" | "mp3" | "ogg" | "opus" | "m4a")
+        Some("flac" | "mp3" | "ogg" | "opus" | "m4a" | "mp4")
     )
 }
 
@@ -309,7 +309,7 @@ mod tests {
 
     #[test]
     fn can_embed_supported_formats() {
-        for ext in &["mp3", "flac", "ogg", "opus", "m4a"] {
+        for ext in &["mp3", "flac", "ogg", "opus", "m4a", "mp4"] {
             assert!(can_embed(Path::new(&format!("file.{ext}"))), "{ext} should be embeddable");
         }
     }

@@ -14,7 +14,7 @@ pub struct TrackInfo {
 }
 
 /// File extensions that lofty can read.
-const SUPPORTED_EXTENSIONS: &[&str] = &["flac", "mp3", "m4a", "ogg", "opus", "wav", "aac"];
+const SUPPORTED_EXTENSIONS: &[&str] = &["flac", "mp3", "m4a", "ogg", "opus", "wav", "aac", "mp4"];
 
 pub fn is_supported(path: &std::path::Path) -> bool {
     path.extension()
